@@ -75,12 +75,36 @@ Built-in doors:
 
 ## Signal gate
 
-The gate is the single front/back relay: the core emits signals
-(`turn.*`, `approval.request`, `permission.changed`, `chunk.changed`) and the
-host answers requests (`approval.request`, `ask_user`) via commands
-(`approval.decision`, `ask_user.answer`). Turns within one session are
-serialized (queued, never dropped); different sessions run in parallel.
-Requests time out fail-closed (default 300s).
+The gate is the single front/back relay — the only boundary between the loop
+core and front-ends (CLI / web / app):
+
+- **Signals down** — the core broadcasts typed signals (`turn.*`,
+  `approval.request`, `permission.changed`, `chunk.changed`); subscribers are
+  isolated, so a throwing subscriber cannot break the stream.
+- **Commands up** — front-ends send typed commands (`user.prompt`,
+  `turn.cancel`, `approval.decision`, `ask_user.answer`, `session.*`,
+  `permission.full`, `chunk.*`).
+- **Request / resolve** — the core asks for approvals or answers with minted
+  request IDs and parks a promise; any front-end answers via command.
+  Fail-closed on timeout (default 300s); late replies are ignored.
+
+Governance deliberately sits at the gate, not in front-ends:
+
+- **Per-session turn serialization** — a second prompt in a busy session is
+  queued (never dropped) and made visible via `turn.queue`; different sessions
+  run in parallel. `dropPending` (turn.cancel) and `forget` (session
+  close/delete) have distinct cleanup semantics to keep the concurrency
+  boundary closed.
+- **Approval round-trips are transport-agnostic** — a terminal prompt, a web
+  modal, and an IM button are interchangeable hosts for the same request.
+- **The boundary is transport-agnostic** — in-process, WebSocket, or an HTTP
+  envelope. `SignalGateHandlers` (`runPrompt` / `cancel` / session CRUD /
+  `setFullPermission`) is the host-injected seam; the core imports nothing
+  front-end-specific.
+
+New kinds are added by extending the `GateSignal` / `GateCommand`
+discriminated unions — the skeleton ships the boundary, the host brings its
+own kinds.
 
 ## Sessions
 
