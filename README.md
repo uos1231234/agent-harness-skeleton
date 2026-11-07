@@ -4,6 +4,10 @@
 
 **English**: A minimal, safe, terminable agent-loop skeleton — OpenAI protocol client + runtime guard shell + pluggable security doors + session isolation + signal-gate front/back decoupling. Zero runtime dependencies. Mechanisms only: prompts, tools, and context engineering are yours to build.
 
+**Skill 版本**：同一套东西我打包成了可安装的 SKILL.md skill，在 [Agensi](https://www.agensi.io/skills/minimal-extensible-agent-loop) 上架（$9/月订阅，含验证步骤与可运行示例）。这个仓库保持 MIT 开源，随时可 clone。
+
+**Skill version**: the same runtime is also packaged as an installable SKILL.md skill on [Agensi](https://www.agensi.io/skills/minimal-extensible-agent-loop) ($9/mo, with a verification checklist and runnable examples). This repo stays MIT-licensed and freely clonable.
+
 ---
 
 ## Why
